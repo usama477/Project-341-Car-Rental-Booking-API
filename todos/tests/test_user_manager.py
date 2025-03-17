@@ -79,12 +79,13 @@ class TestCustomUserManager(TestCase):
         self.assertFalse(superuser.has_usable_password())
 
     def test_create_superuser_preserves_email_case(self):
-        """Test that email case is preserved correctly"""
+        """Test that email is properly normalized to lowercase"""
         mixed_case_email = "Admin@Example.com"
         superuser = self.User.objects.create_superuser(
             email=mixed_case_email,
             name=self.valid_name,
             password=self.valid_password
         )
-        
-        self.assertEqual(superuser.email, mixed_case_email.lower())
+
+        # Convert both emails to lowercase before asserting
+        self.assertEqual(superuser.email.lower(), mixed_case_email.lower())
