@@ -3,25 +3,47 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from unittest.mock import patch, MagicMock
 
-class CustomUserManagerTests(TestCase):
+class TestCustomUserManager(TestCase):
     def setUp(self):
         self.User = get_user_model()
+        self.valid_email = "admin@example.com"
+        self.valid_name = "Admin User"
+        self.valid_password = "adminpass123"
+
+    def test_create_superuser_success(self):
+        """Test creating a superuser with valid credentials"""
+        superuser = self.User.objects.create_superuser(
+            email=self.valid_email,
+            name=self.valid_name,
+            password=self.valid_password
+        )
+        
+        self.assertEqual(superuser.email, self.valid_email)
+        self.assertEqual(superuser.name, self.valid_name)
+        self.assertTrue(superuser.is_staff)
+        self.assertTrue(superuser.is_superuser)
+        self.assertTrue(superuser.check_password(self.valid_password))
+
+    def test_create_superuser_without_email(self):
+        """Test creating a superuser without email should raise error"""
+        with self.assertRaises(ValueError):
+            self.User.objects.create_superuser(
+                email="",
+                name=self.valid_name,
+                password=self.valid_password
+            )
 
     def test_create_user_success(self):
         """Test creating a new user with valid credentials"""
-        email = "test@example.com"
-        name = "Test User"
-        password = "testpass123"
-        
         user = self.User.objects.create_user(
-            email=email,
-            name=name,
-            password=password
+            email=self.valid_email,
+            name=self.valid_name,
+            password=self.valid_password
         )
         
-        self.assertEqual(user.email, email)
-        self.assertEqual(user.name, name)
-        self.assertTrue(user.check_password(password))
+        self.assertEqual(user.email, self.valid_email)
+        self.assertEqual(user.name, self.valid_name)
+        self.assertTrue(user.check_password(self.valid_password))
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
 
