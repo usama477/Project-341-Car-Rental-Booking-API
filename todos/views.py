@@ -1,17 +1,17 @@
-from rest_framework import status
+"""Views for the todos application"""
+from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-from .serializers import UserRegistrationSerializer
-from rest_framework import viewsets, permissions
-from rest_framework.response import Response
 from .models import Task
-from .serializers import TaskSerializer
+from .serializers import UserRegistrationSerializer, TaskSerializer
 
 class UserRegistrationView(APIView):
+    """View for user registration"""
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """Handle POST request for user registration"""
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -19,8 +19,10 @@ class UserRegistrationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class TaskViewSet(viewsets.ModelViewSet):
+    """ViewSet for handling task operations"""
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """Return queryset filtered by current user"""
         return Task.objects.filter(user=self.request.user)
